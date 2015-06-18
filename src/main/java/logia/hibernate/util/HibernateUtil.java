@@ -31,6 +31,9 @@ public class HibernateUtil {
 	/** The config file. */
 	private static String          _configFile = "hibernate-sample.cfg.xml";
 
+	/** The batch size. */
+	public static int              BATCH_SIZE;
+
 	/**
 	 * Create new session and begin transaction.
 	 * 
@@ -49,6 +52,14 @@ public class HibernateUtil {
 		try {
 			HibernateUtil._configuration = new Configuration();
 			HibernateUtil._configuration.configure(HibernateUtil._configFile);
+
+			String proBatchSize = HibernateUtil._configuration.getProperty("hibernate.jdbc.batch_size");
+			try {
+				HibernateUtil.BATCH_SIZE = Integer.parseInt(proBatchSize);
+			}
+			catch (Exception e) {
+				HibernateUtil.BATCH_SIZE = 20;
+			}
 
 			HibernateUtil._serviceRegistry = new StandardServiceRegistryBuilder().applySettings(HibernateUtil._configuration.getProperties()).build();
 			HibernateUtil._sessionFactory = HibernateUtil._configuration.buildSessionFactory(HibernateUtil._serviceRegistry);

@@ -6,7 +6,7 @@
 	<version>0.0.2</version>
 	<build>
 		<finalName>MyHibernate</finalName>
-		<defaultGoal>clean source:jar install</defaultGoal>
+		<defaultGoal>source:jar install</defaultGoal>
 		<resources>
 			<resource>
 				<directory>src/main/resource</directory>

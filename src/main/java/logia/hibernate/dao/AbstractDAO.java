@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import logia.hibernate.util.HibernateUtil;
 import logia.utility.pool.ObjectPool;
 
 import org.hibernate.Query;
@@ -170,6 +171,26 @@ public abstract class AbstractDAO<P, K extends Serializable> implements AutoClos
 	}
 
 	/**
+	 * Save or update list entities.
+	 *
+	 * @param session the session
+	 * @param entities the entities
+	 * @throws Exception the exception
+	 */
+	public void saveOrUpdate(Session session, List<P> entities) throws Exception {
+		synchronized (this.getPOJOClass()) {
+			for (int i = 0; i < entities.size(); i++) {
+				P entity = entities.get(i);
+				session.saveOrUpdate(entity);
+				if (i % HibernateUtil.BATCH_SIZE == 0) {
+					session.flush();
+					session.clear();
+				}
+			}
+		}
+	}
+
+	/**
 	 * Select list object by simple query.
 	 *
 	 * @param session the session
@@ -242,6 +263,26 @@ public abstract class AbstractDAO<P, K extends Serializable> implements AutoClos
 	public void update(Session session, P entity) throws Exception {
 		synchronized (this.getPOJOClass()) {
 			session.update(entity);
+		}
+	}
+
+	/**
+	 * Update list entities.
+	 *
+	 * @param session the session
+	 * @param entities the entities
+	 * @throws Exception the exception
+	 */
+	public void update(Session session, List<P> entities) throws Exception {
+		synchronized (this.getPOJOClass()) {
+			for (int i = 0; i < entities.size(); i++) {
+				P entity = entities.get(i);
+				session.update(entity);
+				if (i % HibernateUtil.BATCH_SIZE == 0) {
+					session.flush();
+					session.clear();
+				}
+			}
 		}
 	}
 
