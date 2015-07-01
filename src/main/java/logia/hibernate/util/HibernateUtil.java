@@ -4,10 +4,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import org.hibernate.c3p0.internal.C3P0ConnectionProvider;
 import org.hibernate.cfg.Configuration;
-import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
-import org.hibernate.internal.SessionFactoryImpl;
 import org.hibernate.search.FullTextSession;
 import org.hibernate.search.Search;
 import org.hibernate.service.ServiceRegistry;
@@ -131,13 +128,13 @@ public class HibernateUtil {
 	 */
 	public static void releaseFactory() {
 		try {
-			if (HibernateUtil._sessionFactory instanceof SessionFactoryImpl) {
-				SessionFactoryImpl impl = (SessionFactoryImpl) HibernateUtil._sessionFactory;
-				ConnectionProvider connectionProvider = impl.getConnectionProvider();
-				if (connectionProvider instanceof C3P0ConnectionProvider) {
-					((C3P0ConnectionProvider) connectionProvider).stop();
-				}
-			}
+			// if (HibernateUtil._sessionFactory instanceof SessionFactoryImpl) {
+			// SessionFactoryImpl impl = (SessionFactoryImpl) HibernateUtil._sessionFactory;
+			// ConnectionProvider connectionProvider = impl.getConnectionProvider();
+			// if (connectionProvider instanceof C3P0ConnectionProvider) {
+			// ((C3P0ConnectionProvider) connectionProvider).stop();
+			// }
+			// }
 			HibernateUtil._sessionFactory.close();
 			HibernateUtil._sessionFactory = null;
 			HibernateUtil._configuration = null;
