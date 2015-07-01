@@ -28,9 +28,7 @@ public abstract class AbstractDAO<P, K extends Serializable> implements AutoClos
 	 * @throws Exception the exception
 	 */
 	public void delete(Session session, P entity) throws Exception {
-		synchronized (this.getPOJOClass()) {
-			session.delete(entity);
-		}
+		session.delete(entity);
 	}
 
 	/**
@@ -42,18 +40,16 @@ public abstract class AbstractDAO<P, K extends Serializable> implements AutoClos
 	 * @throws Exception the exception
 	 */
 	public int deleteList(Session session, List<K> listId) throws Exception {
-		synchronized (this.getPOJOClass()) {
-			int numberEffect;
-			if (listId.size() > 0) {
-				Query query = session.createQuery(String.format("delete from %s obj where id in (:idList)", this.getPOJOClass().getName()));
-				query.setParameterList("idList", listId);
-				numberEffect = query.executeUpdate();
-			}
-			else {
-				numberEffect = 0;
-			}
-			return numberEffect;
+		int numberEffect;
+		if (listId.size() > 0) {
+			Query query = session.createQuery(String.format("delete from %s obj where id in (:idList)", this.getPOJOClass().getName()));
+			query.setParameterList("idList", listId);
+			numberEffect = query.executeUpdate();
 		}
+		else {
+			numberEffect = 0;
+		}
+		return numberEffect;
 	}
 
 	/**
@@ -152,8 +148,24 @@ public abstract class AbstractDAO<P, K extends Serializable> implements AutoClos
 	 */
 	@SuppressWarnings("unchecked")
 	public K saveID(Session session, P entity) throws Exception {
-		synchronized (this.getPOJOClass()) {
-			return (K) session.save(entity);
+		return (K) session.save(entity);
+	}
+
+	/**
+	 * Save or update list entities.
+	 *
+	 * @param session the session
+	 * @param entities the entities
+	 * @throws Exception the exception
+	 */
+	public void saveOrUpdate(Session session, List<P> entities) throws Exception {
+		for (int i = 0; i < entities.size(); i++) {
+			P entity = entities.get(i);
+			session.saveOrUpdate(entity);
+			if (i % HibernateUtil.BATCH_SIZE == 0) {
+				session.flush();
+				session.clear();
+			}
 		}
 	}
 
@@ -165,29 +177,7 @@ public abstract class AbstractDAO<P, K extends Serializable> implements AutoClos
 	 * @throws Exception the exception
 	 */
 	public void saveOrUpdate(Session session, P entity) throws Exception {
-		synchronized (this.getPOJOClass()) {
-			session.saveOrUpdate(entity);
-		}
-	}
-
-	/**
-	 * Save or update list entities.
-	 *
-	 * @param session the session
-	 * @param entities the entities
-	 * @throws Exception the exception
-	 */
-	public void saveOrUpdate(Session session, List<P> entities) throws Exception {
-		synchronized (this.getPOJOClass()) {
-			for (int i = 0; i < entities.size(); i++) {
-				P entity = entities.get(i);
-				session.saveOrUpdate(entity);
-				if (i % HibernateUtil.BATCH_SIZE == 0) {
-					session.flush();
-					session.clear();
-				}
-			}
-		}
+		session.saveOrUpdate(entity);
 	}
 
 	/**
@@ -254,19 +244,6 @@ public abstract class AbstractDAO<P, K extends Serializable> implements AutoClos
 	}
 
 	/**
-	 * Update.
-	 *
-	 * @param session the session
-	 * @param entity the entity want to update
-	 * @throws Exception the exception
-	 */
-	public void update(Session session, P entity) throws Exception {
-		synchronized (this.getPOJOClass()) {
-			session.update(entity);
-		}
-	}
-
-	/**
 	 * Update list entities.
 	 *
 	 * @param session the session
@@ -274,16 +251,25 @@ public abstract class AbstractDAO<P, K extends Serializable> implements AutoClos
 	 * @throws Exception the exception
 	 */
 	public void update(Session session, List<P> entities) throws Exception {
-		synchronized (this.getPOJOClass()) {
-			for (int i = 0; i < entities.size(); i++) {
-				P entity = entities.get(i);
-				session.update(entity);
-				if (i % HibernateUtil.BATCH_SIZE == 0) {
-					session.flush();
-					session.clear();
-				}
+		for (int i = 0; i < entities.size(); i++) {
+			P entity = entities.get(i);
+			session.update(entity);
+			if (i % HibernateUtil.BATCH_SIZE == 0) {
+				session.flush();
+				session.clear();
 			}
 		}
+	}
+
+	/**
+	 * Update.
+	 *
+	 * @param session the session
+	 * @param entity the entity want to update
+	 * @throws Exception the exception
+	 */
+	public void update(Session session, P entity) throws Exception {
+		session.update(entity);
 	}
 
 	/**
@@ -295,10 +281,8 @@ public abstract class AbstractDAO<P, K extends Serializable> implements AutoClos
 	 * @throws Exception the exception
 	 */
 	public int updateBySQLQuery(Session session, String queryString) throws Exception {
-		synchronized (this.getPOJOClass()) {
-			Query query = session.createSQLQuery(queryString);
-			return query.executeUpdate();
-		}
+		Query query = session.createSQLQuery(queryString);
+		return query.executeUpdate();
 	}
 
 	/**

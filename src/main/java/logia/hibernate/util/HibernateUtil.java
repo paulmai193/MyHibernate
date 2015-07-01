@@ -19,20 +19,20 @@ import org.hibernate.service.ServiceRegistry;
  */
 public class HibernateUtil {
 
-	/** The _session factory. */
-	private static SessionFactory  _sessionFactory;
-
-	/** The _service registry. */
-	private static ServiceRegistry _serviceRegistry;
-
-	/** The configuration. */
-	private static Configuration   _configuration;
+	/** The batch size. */
+	public static int              BATCH_SIZE;
 
 	/** The config file. */
 	private static String          _configFile = "hibernate-sample.cfg.xml";
 
-	/** The batch size. */
-	public static int              BATCH_SIZE;
+	/** The configuration. */
+	private static Configuration   _configuration;
+
+	/** The _service registry. */
+	private static ServiceRegistry _serviceRegistry;
+
+	/** The _session factory. */
+	private static SessionFactory  _sessionFactory;
 
 	/**
 	 * Create new session and begin transaction.
