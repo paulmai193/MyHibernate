@@ -5,9 +5,9 @@
 		<!-- Data source -->
 		<property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
 		<property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
-		<property name="hibernate.connection.url">jdbc:mysql://localhost:3306/database</property>
-		<property name="hibernate.connection.username">user name</property>
-		<property name="hibernate.connection.password">password</property>
+		<property name="hibernate.connection.url">jdbc:mysql://localhost:3306/test</property>
+		<property name="hibernate.connection.username">root</property>
+		<property name="hibernate.connection.password"></property>
 		<property name="hibernate.connection.useUnicode">true</property>
 		<property name="hibernate.connection.characterEncoding">UTF-8</property>
 		<property name="hibernate.connection.charSet">UTF-8</property>		
@@ -15,6 +15,7 @@
 		<property name="hibernate.hbm2ddl.auto">update</property>
 		<property name="hibernate.show_sql">false</property>
 		<property name="hibernate.jdbc.batch_size">50</property>
+		<property name="hibernate.temp.use_jdbc_metadata_defaults">false</property>
 		
 		<!-- Connection pool -->
 		<property name="hibernate.connection.provider_class">org.hibernate.connection.C3P0ConnectionProvider</property>
@@ -25,14 +26,14 @@
 		<property name="hibernate.c3p0.min_size">10</property>
 		<property name="hibernate.c3p0.max_statements">0</property>
 		<property name="hibernate.c3p0.preferredTestQuery">select 1;</property>
-		<property name="hibernate.connection.provider_class">org.hibernate.service.jdbc.connections.internal.C3P0ConnectionProvider</property>		
+		<!-- <property name="hibernate.connection.provider_class">org.hibernate.service.jdbc.connections.internal.C3P0ConnectionProvider</property> -->		
 
 		<!-- Hibernate search -->
 		<property name="hibernate.search.default.directory_provider">filesystem</property>
 		<property name="hibernate.search.default.indexBase">{file/path}/indexes_document</property>
 		
 		<!-- Mapping -->
-		<mapping resource="com/nowktv/hibernate/mapping/Artist.hbm.xml" />
+		<mapping resource="user.hbm.xml" />
 
 	</session-factory>
 </hibernate-configuration>

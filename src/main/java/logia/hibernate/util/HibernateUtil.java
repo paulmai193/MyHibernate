@@ -1,10 +1,14 @@
 package logia.hibernate.util;
 
+import org.apache.log4j.Logger;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.c3p0.internal.C3P0ConnectionProvider;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
+import org.hibernate.internal.SessionFactoryImpl;
 import org.hibernate.search.FullTextSession;
 import org.hibernate.search.Search;
 import org.hibernate.service.ServiceRegistry;
@@ -16,6 +20,7 @@ import org.hibernate.service.ServiceRegistry;
  */
 public class HibernateUtil {
 
+	private static final Logger    LOGGER      = Logger.getLogger(HibernateUtil.class);
 	/** The batch size. */
 	public static int              BATCH_SIZE;
 
@@ -60,12 +65,11 @@ public class HibernateUtil {
 
 			HibernateUtil._serviceRegistry = new StandardServiceRegistryBuilder().applySettings(HibernateUtil._configuration.getProperties()).build();
 			HibernateUtil._sessionFactory = HibernateUtil._configuration.buildSessionFactory(HibernateUtil._serviceRegistry);
-			System.out.println("Build session factory success");
+			LOGGER.debug("Build session factory success");
 
 		}
 		catch (HibernateException e) {
-			System.err.println(e.getMessage());
-			e.printStackTrace();
+			LOGGER.error("Cannot build hibernate session factory", e);
 		}
 	}
 
@@ -100,6 +104,17 @@ public class HibernateUtil {
 	}
 
 	/**
+	 * Gets the full text session.
+	 *
+	 * @param session the session
+	 * @return the full text session
+	 */
+	public static FullTextSession getFullTextSession(Session session) {
+		FullTextSession fullTextSession = Search.getFullTextSession(session);
+		return fullTextSession;
+	}
+
+	/**
 	 * Gets the session.
 	 *
 	 * @return the session
@@ -128,21 +143,20 @@ public class HibernateUtil {
 	 */
 	public static void releaseFactory() {
 		try {
-			// if (HibernateUtil._sessionFactory instanceof SessionFactoryImpl) {
-			// SessionFactoryImpl impl = (SessionFactoryImpl) HibernateUtil._sessionFactory;
-			// ConnectionProvider connectionProvider = impl.getConnectionProvider();
-			// if (connectionProvider instanceof C3P0ConnectionProvider) {
-			// ((C3P0ConnectionProvider) connectionProvider).stop();
-			// }
-			// }
+			if (HibernateUtil._sessionFactory instanceof SessionFactoryImpl) {
+				SessionFactoryImpl impl = (SessionFactoryImpl) HibernateUtil._sessionFactory;
+				ConnectionProvider connectionProvider = impl.getConnectionProvider();
+				if (connectionProvider instanceof C3P0ConnectionProvider) {
+					((C3P0ConnectionProvider) connectionProvider).stop();
+				}
+			}
 			HibernateUtil._sessionFactory.close();
 			HibernateUtil._sessionFactory = null;
 			HibernateUtil._configuration = null;
 			System.out.println("Close session factory success");
 		}
 		catch (HibernateException e) {
-			System.err.println(e.getMessage());
-			e.printStackTrace();
+			LOGGER.error("Cannot release hibernate session factory", e);
 		}
 	}
 

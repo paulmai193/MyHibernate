@@ -7,6 +7,7 @@ import java.util.List;
 import logia.hibernate.util.HibernateUtil;
 import logia.utility.pool.ObjectPool;
 
+import org.apache.log4j.Logger;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
@@ -19,6 +20,8 @@ import org.hibernate.Session;
  * @author Paul Mai
  */
 public abstract class AbstractDAO<P, K extends Serializable> implements AutoCloseable {
+
+	private final Logger LOGGER = Logger.getLogger(getClass());
 
 	/**
 	 * Delete.
@@ -66,8 +69,7 @@ public abstract class AbstractDAO<P, K extends Serializable> implements AutoClos
 			entity = (P) session.get(this.getPOJOClass(), key);
 		}
 		catch (Exception e) {
-			System.err.println(e.getMessage());
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		}
 		return entity;
 	}
@@ -87,8 +89,31 @@ public abstract class AbstractDAO<P, K extends Serializable> implements AutoClos
 			entities = query.list();
 		}
 		catch (Exception e) {
-			System.err.println(e.getMessage());
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
+		}
+		return entities;
+	}
+
+	/**
+	 * Gets the list.
+	 *
+	 * @param session the session
+	 * @param limit the maximum number of rows
+	 * @param offset the first result a row number, start from 0
+	 * @return the list
+	 */
+	@SuppressWarnings("unchecked")
+	public List<P> getList(Session session, int limit, int offset) {
+		List<P> entities = null;
+		try {
+			String hql = String.format("Select obj from %s obj", this.getPOJOClass().getName());
+			Query query = session.createQuery(hql);
+			query.setMaxResults(limit);
+			query.setFirstResult(offset);
+			entities = query.list();
+		}
+		catch (Exception e) {
+			LOGGER.error(e.getMessage(), e);
 		}
 		return entities;
 	}
@@ -100,19 +125,18 @@ public abstract class AbstractDAO<P, K extends Serializable> implements AutoClos
 	 * @param key the key
 	 * @return the list entities
 	 */
-	@SuppressWarnings("unchecked")
 	public List<P> getListById(Session session, List<K> key) {
 		List<P> entities = new ArrayList<P>();
 		try {
 			for (K k : key) {
+				@SuppressWarnings("unchecked")
 				P entity = (P) session.get(this.getPOJOClass(), k);
 
 				entities.add(entity);
 			}
 		}
 		catch (Exception e) {
-			System.err.println(e.getMessage());
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		}
 		return entities;
 	}
@@ -132,8 +156,31 @@ public abstract class AbstractDAO<P, K extends Serializable> implements AutoClos
 			list = query.list();
 		}
 		catch (Exception e) {
-			System.err.println(e.getMessage());
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
+		}
+		return list;
+	}
+
+	/**
+	 * Gets the list id.
+	 *
+	 * @param session the session
+	 * @param limit the maximum number of rows
+	 * @param offset the first result a row number, start from 0
+	 * @return the list id
+	 */
+	@SuppressWarnings("unchecked")
+	public List<K> getListId(Session session, int limit, int offset) {
+		List<K> list = null;
+		try {
+			String hql = String.format("Select id from %s obj", this.getPOJOClass().getName());
+			Query query = session.createQuery(hql);
+			query.setMaxResults(limit);
+			query.setFirstResult(offset);
+			list = query.list();
+		}
+		catch (Exception e) {
+			LOGGER.error(e.getMessage(), e);
 		}
 		return list;
 	}
@@ -195,8 +242,31 @@ public abstract class AbstractDAO<P, K extends Serializable> implements AutoClos
 			list = query.list();
 		}
 		catch (Exception e) {
-			System.err.println(e.getMessage());
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
+		}
+		return list;
+	}
+
+	/**
+	 * Select by query.
+	 *
+	 * @param session the session
+	 * @param queryString the query string
+	 * @param limit the maximum number of rows
+	 * @param offset the first result a row number, start from 0
+	 * @return the list
+	 */
+	@SuppressWarnings("rawtypes")
+	public List selectByQuery(Session session, String queryString, int limit, int offset) {
+		List list = null;
+		try {
+			Query query = session.createQuery(queryString);
+			query.setMaxResults(limit);
+			query.setFirstResult(offset);
+			list = query.list();
+		}
+		catch (Exception e) {
+			LOGGER.error(e.getMessage(), e);
 		}
 		return list;
 	}
@@ -216,8 +286,31 @@ public abstract class AbstractDAO<P, K extends Serializable> implements AutoClos
 			list = query.list();
 		}
 		catch (Exception e) {
-			System.err.println(e.getMessage());
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
+		}
+		return list;
+	}
+
+	/**
+	 * Select by sql query.
+	 *
+	 * @param session the session
+	 * @param queryString the SQL query string
+	 * @param limit the maximum number of rows
+	 * @param offset the first result a row number, start from 0
+	 * @return the list
+	 */
+	@SuppressWarnings("rawtypes")
+	public List selectBySqlQuery(Session session, String queryString, int limit, int offset) {
+		List list = null;
+		try {
+			Query query = session.createSQLQuery(queryString);
+			query.setMaxResults(limit);
+			query.setFirstResult(offset);
+			list = query.list();
+		}
+		catch (Exception e) {
+			LOGGER.error(e.getMessage(), e);
 		}
 		return list;
 	}
@@ -237,8 +330,7 @@ public abstract class AbstractDAO<P, K extends Serializable> implements AutoClos
 			entity = (P) query.uniqueResult();
 		}
 		catch (Exception e) {
-			System.err.println(e.getMessage());
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		}
 		return entity;
 	}
