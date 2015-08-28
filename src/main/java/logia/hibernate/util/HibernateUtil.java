@@ -18,9 +18,8 @@ import org.hibernate.service.ServiceRegistry;
  * 
  * @author Paul Mai
  */
-public class HibernateUtil {
+public final class HibernateUtil {
 
-	private static final Logger    LOGGER      = Logger.getLogger(HibernateUtil.class);
 	/** The batch size. */
 	public static int              BATCH_SIZE;
 
@@ -35,6 +34,15 @@ public class HibernateUtil {
 
 	/** The _session factory. */
 	private static SessionFactory  _sessionFactory;
+
+	/** The Constant LOGGER. */
+	private static final Logger    LOGGER      = Logger.getLogger(HibernateUtil.class);
+
+	/**
+	 * Instantiates a new hibernate util.
+	 */
+	private HibernateUtil() {
+	}
 
 	/**
 	 * Create new session and begin transaction.
@@ -65,11 +73,11 @@ public class HibernateUtil {
 
 			HibernateUtil._serviceRegistry = new StandardServiceRegistryBuilder().applySettings(HibernateUtil._configuration.getProperties()).build();
 			HibernateUtil._sessionFactory = HibernateUtil._configuration.buildSessionFactory(HibernateUtil._serviceRegistry);
-			LOGGER.debug("Build session factory success");
+			HibernateUtil.LOGGER.debug("Build session factory success");
 
 		}
 		catch (HibernateException e) {
-			LOGGER.error("Cannot build hibernate session factory", e);
+			HibernateUtil.LOGGER.error("Cannot build hibernate session factory", e);
 		}
 	}
 
@@ -156,7 +164,7 @@ public class HibernateUtil {
 			System.out.println("Close session factory success");
 		}
 		catch (HibernateException e) {
-			LOGGER.error("Cannot release hibernate session factory", e);
+			HibernateUtil.LOGGER.error("Cannot release hibernate session factory", e);
 		}
 	}
 

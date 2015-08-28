@@ -3,12 +3,12 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>logia</groupId>
 	<artifactId>logia-hibernate-impl</artifactId>
-	<version>0.0.2</version>
+	<version>0.0.3</version>
 	<properties>
 		<hibernate.core.version>4.3.10.Final</hibernate.core.version>
 		<hibernate.search.version>5.3.0.Final</hibernate.search.version>
 		<hibernate.mysql.connector.version>5.1.35</hibernate.mysql.connector.version>
-		<logia.utility.version>0.1.0</logia.utility.version>
+		<logia.utility.version>0.1.1</logia.utility.version>
 	</properties>
 	<build>
 		<finalName>MyHibernate</finalName>
