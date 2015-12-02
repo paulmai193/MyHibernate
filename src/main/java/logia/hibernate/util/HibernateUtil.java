@@ -5,13 +5,11 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import org.hibernate.c3p0.internal.C3P0ConnectionProvider;
 import org.hibernate.cfg.Configuration;
-import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
-import org.hibernate.internal.SessionFactoryImpl;
 import org.hibernate.search.FullTextSession;
 import org.hibernate.search.Search;
 import org.hibernate.service.ServiceRegistry;
+import org.hibernate.stat.Statistics;
 
 /**
  * Hibernate Utility class with a convenient method to get Session Factory object.
@@ -46,10 +44,11 @@ public final class HibernateUtil {
 
 	/**
 	 * Create new session and begin transaction.
-	 * 
+	 *
 	 * @return the session
+	 * @throws HibernateException the hibernate exception
 	 */
-	public static Session beginTransaction() {
+	public static Session beginTransaction() throws HibernateException {
 		Session hibernateSession = HibernateUtil.getSession();
 		hibernateSession.beginTransaction();
 		return hibernateSession;
@@ -57,46 +56,46 @@ public final class HibernateUtil {
 
 	/**
 	 * Build session factory.
+	 *
+	 * @throws HibernateException the hibernate exception
 	 */
-	public static void buildSessionFactory() {
+	public static void buildSessionFactory() throws HibernateException {
+		HibernateUtil._configuration = new Configuration();
+		HibernateUtil._configuration.configure(HibernateUtil._configFile);
+
+		String proBatchSize = HibernateUtil._configuration.getProperty("hibernate.jdbc.batch_size");
 		try {
-			HibernateUtil._configuration = new Configuration();
-			HibernateUtil._configuration.configure(HibernateUtil._configFile);
-
-			String proBatchSize = HibernateUtil._configuration.getProperty("hibernate.jdbc.batch_size");
-			try {
-				HibernateUtil.BATCH_SIZE = Integer.parseInt(proBatchSize);
-			}
-			catch (Exception e) {
-				HibernateUtil.BATCH_SIZE = 20;
-			}
-
-			HibernateUtil._serviceRegistry = new StandardServiceRegistryBuilder().applySettings(HibernateUtil._configuration.getProperties()).build();
-			HibernateUtil._sessionFactory = HibernateUtil._configuration.buildSessionFactory(HibernateUtil._serviceRegistry);
-			HibernateUtil.LOGGER.debug("Build session factory success");
-
+			HibernateUtil.BATCH_SIZE = Integer.parseInt(proBatchSize);
 		}
-		catch (HibernateException e) {
-			HibernateUtil.LOGGER.error("Cannot build hibernate session factory", e);
+		catch (Exception e) {
+			HibernateUtil.BATCH_SIZE = 20;
 		}
+
+		HibernateUtil._serviceRegistry = new StandardServiceRegistryBuilder().applySettings(HibernateUtil._configuration.getProperties()).build();
+		HibernateUtil._sessionFactory = HibernateUtil._configuration.buildSessionFactory(HibernateUtil._serviceRegistry);
+		HibernateUtil._sessionFactory.getStatistics().setStatisticsEnabled(true);
+		HibernateUtil.LOGGER.debug("Build session factory success");
+
 	}
 
 	/**
 	 * Close the input session.
-	 * 
+	 *
 	 * @param hibernateSession the hibernate session
+	 * @throws HibernateException the hibernate exception
 	 */
-	public static void closeSession(Session hibernateSession) {
+	public static void closeSession(Session hibernateSession) throws HibernateException {
 		hibernateSession.close();
 		hibernateSession = null;
 	}
 
 	/**
 	 * Commit transaction of the input session.
-	 * 
+	 *
 	 * @param hibernateSession the hibernate session
+	 * @throws HibernateException the hibernate exception
 	 */
-	public static void commitTransaction(Session hibernateSession) {
+	public static void commitTransaction(Session hibernateSession) throws HibernateException {
 		hibernateSession.getTransaction().commit();
 	}
 
@@ -104,8 +103,9 @@ public final class HibernateUtil {
 	 * Gets the full text session.
 	 *
 	 * @return the full text session
+	 * @throws HibernateException the hibernate exception
 	 */
-	public static FullTextSession getFullTextSession() {
+	public static FullTextSession getFullTextSession() throws HibernateException {
 		Session session = HibernateUtil.getSession();
 		FullTextSession fullTextSession = Search.getFullTextSession(session);
 		return fullTextSession;
@@ -126,8 +126,9 @@ public final class HibernateUtil {
 	 * Gets the session.
 	 *
 	 * @return the session
+	 * @throws HibernateException the hibernate exception
 	 */
-	public static Session getSession() {
+	public static Session getSession() throws HibernateException {
 		if (HibernateUtil._sessionFactory == null || HibernateUtil._sessionFactory.isClosed()) {
 			HibernateUtil.buildSessionFactory();
 		}
@@ -138,9 +139,10 @@ public final class HibernateUtil {
 	/**
 	 * Indexing for Hibernate search.
 	 *
-	 * @throws Exception the exception
+	 * @throws InterruptedException the interrupted exception
+	 * @throws HibernateException the hibernate exception
 	 */
-	public static synchronized void indexing() throws Exception {
+	public static synchronized void indexing() throws InterruptedException, HibernateException {
 		FullTextSession fullTextSession = HibernateUtil.getFullTextSession();
 		fullTextSession.createIndexer().startAndWait();
 		HibernateUtil.closeSession(fullTextSession);
@@ -151,29 +153,30 @@ public final class HibernateUtil {
 	 */
 	public static void releaseFactory() {
 		try {
-			if (HibernateUtil._sessionFactory instanceof SessionFactoryImpl) {
-				SessionFactoryImpl impl = (SessionFactoryImpl) HibernateUtil._sessionFactory;
-				ConnectionProvider connectionProvider = impl.getConnectionProvider();
-				if (connectionProvider instanceof C3P0ConnectionProvider) {
-					((C3P0ConnectionProvider) connectionProvider).stop();
-				}
-			}
+			// if (HibernateUtil._sessionFactory instanceof SessionFactoryImpl) {
+			// SessionFactoryImpl impl = (SessionFactoryImpl) HibernateUtil._sessionFactory;
+			// ConnectionProvider connectionProvider = impl.getConnectionProvider();
+			// if (connectionProvider instanceof C3P0ConnectionProvider) {
+			// ((C3P0ConnectionProvider) connectionProvider).stop();
+			// }
+			// }
 			HibernateUtil._sessionFactory.close();
 			HibernateUtil._sessionFactory = null;
 			HibernateUtil._configuration = null;
-			System.out.println("Close session factory success");
+			HibernateUtil.LOGGER.debug("Close session factory success");
 		}
-		catch (HibernateException e) {
+		catch (Exception e) {
 			HibernateUtil.LOGGER.error("Cannot release hibernate session factory", e);
 		}
 	}
 
 	/**
 	 * Rollback transaction of the input session.
-	 * 
+	 *
 	 * @param hibernateSession the hibernate session
+	 * @throws HibernateException the hibernate exception
 	 */
-	public static void rollbackTransaction(Session hibernateSession) {
+	public static void rollbackTransaction(Session hibernateSession) throws HibernateException {
 		hibernateSession.getTransaction().rollback();
 	}
 
@@ -186,4 +189,12 @@ public final class HibernateUtil {
 		HibernateUtil._configFile = configPath;
 	}
 
+	/**
+	 * Gets the statistics.
+	 *
+	 * @return the statistics
+	 */
+	public static Statistics getStatistics() {
+		return HibernateUtil._sessionFactory.getStatistics();
+	}
 }

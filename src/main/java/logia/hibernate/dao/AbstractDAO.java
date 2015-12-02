@@ -3,11 +3,15 @@ package logia.hibernate.dao;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import logia.hibernate.util.HibernateUtil;
 import logia.utility.pool.ObjectPool;
 
 import org.apache.log4j.Logger;
+import org.hibernate.HibernateException;
+import org.hibernate.NonUniqueResultException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
@@ -19,7 +23,7 @@ import org.hibernate.Session;
  * @param <P> the generic type
  * @param <K> the key type
  */
-public abstract class AbstractDAO<P, K extends Serializable> implements AutoCloseable {
+public abstract class AbstractDAO<P, K extends Serializable> {
 
 	/** The logger. */
 	protected final Logger LOGGER = Logger.getLogger(this.getClass());
@@ -31,6 +35,7 @@ public abstract class AbstractDAO<P, K extends Serializable> implements AutoClos
 	 * @param pool the pool
 	 * @return the t
 	 */
+	@Deprecated
 	public static <T extends AbstractDAO<?, ?>> T borrowFromPool(ObjectPool<T> pool) {
 		return pool.borrowObject();
 	}
@@ -40,9 +45,9 @@ public abstract class AbstractDAO<P, K extends Serializable> implements AutoClos
 	 *
 	 * @param session the session
 	 * @param entity the entity want to delete
-	 * @throws Exception the exception
+	 * @throws HibernateException the hibernate exception
 	 */
-	public void delete(Session session, P entity) throws Exception {
+	public void delete(Session session, P entity) throws HibernateException {
 		session.delete(entity);
 	}
 
@@ -52,9 +57,9 @@ public abstract class AbstractDAO<P, K extends Serializable> implements AutoClos
 	 * @param session the session
 	 * @param listId the list ID
 	 * @return the number of entities deleted.
-	 * @throws Exception the exception
+	 * @throws HibernateException the hibernate exception
 	 */
-	public int deleteList(Session session, List<K> listId) throws Exception {
+	public int deleteList(Session session, List<K> listId) throws HibernateException {
 		int numberEffect;
 		if (listId.size() > 0) {
 			Query query = session.createQuery(String.format("delete from %s obj where id in (:idList)", this.getPOJOClass().getName()));
@@ -70,105 +75,126 @@ public abstract class AbstractDAO<P, K extends Serializable> implements AutoClos
 	/**
 	 * Gets the.
 	 *
-	 * @param session the session
 	 * @param key the key
 	 * @return the entity
 	 * @throws Exception the exception
 	 */
-	@SuppressWarnings("unchecked")
-	public P get(Session session, K key) throws Exception {
-		return (P) session.get(this.getPOJOClass(), key);
+	public P get(K key) throws HibernateException {
+		Session session = HibernateUtil.getSession();
+		try {
+			return (P) session.get(this.getPOJOClass(), key);
+		}
+		finally {
+			HibernateUtil.closeSession(session);
+		}
+
 	}
 
 	/**
 	 * Gets the list entities.
 	 *
-	 * @param session the session
 	 * @return the list entities
-	 * @throws Exception the exception
+	 * @throws HibernateException the hibernate exception
 	 */
 	@SuppressWarnings("unchecked")
-	public List<P> getList(Session session) throws Exception {
-		List<P> entities = null;
-		String hql = String.format("Select obj from %s obj", this.getPOJOClass().getName());
-		Query query = session.createQuery(hql);
-		entities = query.list();
-		return entities;
+	public List<P> getList() throws HibernateException {
+		Session session = HibernateUtil.getSession();
+		try {
+			String hql = String.format("Select obj from %s obj", this.getPOJOClass().getName());
+			Query query = session.createQuery(hql);
+			return query.list();
+		}
+		finally {
+			HibernateUtil.closeSession(session);
+		}
 	}
 
 	/**
 	 * Gets the list.
 	 *
-	 * @param session the session
 	 * @param limit the maximum number of rows
 	 * @param offset the first result a row number, start from 0
 	 * @return the list
-	 * @throws Exception the exception
+	 * @throws HibernateException the hibernate exception
 	 */
 	@SuppressWarnings("unchecked")
-	public List<P> getList(Session session, int limit, int offset) throws Exception {
-		List<P> entities = null;
-		String hql = String.format("Select obj from %s obj", this.getPOJOClass().getName());
-		Query query = session.createQuery(hql);
-		query.setMaxResults(limit);
-		query.setFirstResult(offset);
-		entities = query.list();
-		return entities;
+	public List<P> getList(int limit, int offset) throws HibernateException {
+		Session session = HibernateUtil.getSession();
+		try {
+			String hql = String.format("Select obj from %s obj", this.getPOJOClass().getName());
+			Query query = session.createQuery(hql);
+			query.setMaxResults(limit);
+			query.setFirstResult(offset);
+			return query.list();
+		}
+		finally {
+			HibernateUtil.closeSession(session);
+		}
 	}
 
 	/**
 	 * Gets list of entities by IDs.
 	 *
-	 * @param session the session
 	 * @param key the key
 	 * @return the list entities
-	 * @throws Exception the exception
+	 * @throws HibernateException the hibernate exception
 	 */
-	public List<P> getListById(Session session, List<K> key) throws Exception {
+	public List<P> getListById(List<K> key) throws HibernateException {
 		List<P> entities = new ArrayList<P>();
-		for (K k : key) {
-			@SuppressWarnings("unchecked")
-			P entity = (P) session.get(this.getPOJOClass(), k);
+		Session session = HibernateUtil.getSession();
+		try {
+			for (K k : key) {
+				P entity = (P) session.get(this.getPOJOClass(), k);
 
-			entities.add(entity);
+				entities.add(entity);
+			}
+			return entities;
 		}
-		return entities;
+		finally {
+			HibernateUtil.closeSession(session);
+		}
 	}
 
 	/**
 	 * Gets the list id.
 	 *
-	 * @param session the session
 	 * @return the list id
-	 * @throws Exception the exception
+	 * @throws HibernateException the hibernate exception
 	 */
 	@SuppressWarnings("unchecked")
-	public List<K> getListId(Session session) throws Exception {
-		List<K> list = null;
-		String hql = String.format("Select id from %s obj", this.getPOJOClass().getName());
-		Query query = session.createQuery(hql);
-		list = query.list();
-		return list;
+	public List<K> getListId() throws HibernateException {
+		Session session = HibernateUtil.getSession();
+		try {
+			String hql = String.format("Select id from %s obj", this.getPOJOClass().getName());
+			Query query = session.createQuery(hql);
+			return query.list();
+		}
+		finally {
+			HibernateUtil.closeSession(session);
+		}
 	}
 
 	/**
 	 * Gets the list id.
 	 *
-	 * @param session the session
 	 * @param limit the maximum number of rows
 	 * @param offset the first result a row number, start from 0
 	 * @return the list id
-	 * @throws Exception the exception
+	 * @throws HibernateException the hibernate exception
 	 */
 	@SuppressWarnings("unchecked")
-	public List<K> getListId(Session session, int limit, int offset) throws Exception {
-		List<K> list = null;
-		String hql = String.format("Select id from %s obj", this.getPOJOClass().getName());
-		Query query = session.createQuery(hql);
-		query.setMaxResults(limit);
-		query.setFirstResult(offset);
-		list = query.list();
-		return list;
+	public List<K> getListId(int limit, int offset) throws HibernateException {
+		Session session = HibernateUtil.getSession();
+		try {
+			String hql = String.format("Select id from %s obj", this.getPOJOClass().getName());
+			Query query = session.createQuery(hql);
+			query.setMaxResults(limit);
+			query.setFirstResult(offset);
+			return query.list();
+		}
+		finally {
+			HibernateUtil.closeSession(session);
+		}
 	}
 
 	/**
@@ -177,10 +203,10 @@ public abstract class AbstractDAO<P, K extends Serializable> implements AutoClos
 	 * @param session the session
 	 * @param entity the entity
 	 * @return the ID of entity
-	 * @throws Exception the exception
+	 * @throws HibernateException the hibernate exception
 	 */
 	@SuppressWarnings("unchecked")
-	public K saveID(Session session, P entity) throws Exception {
+	public K saveID(Session session, P entity) throws HibernateException {
 		return (K) session.save(entity);
 	}
 
@@ -189,9 +215,9 @@ public abstract class AbstractDAO<P, K extends Serializable> implements AutoClos
 	 *
 	 * @param session the session
 	 * @param entities the entities
-	 * @throws Exception the exception
+	 * @throws HibernateException the hibernate exception
 	 */
-	public void saveOrUpdate(Session session, List<P> entities) throws Exception {
+	public void saveOrUpdate(Session session, List<P> entities) throws HibernateException {
 		for (int i = 0; i < entities.size(); i++) {
 			P entity = entities.get(i);
 			session.saveOrUpdate(entity);
@@ -207,98 +233,177 @@ public abstract class AbstractDAO<P, K extends Serializable> implements AutoClos
 	 *
 	 * @param session the session
 	 * @param entity the entity
-	 * @throws Exception the exception
+	 * @throws HibernateException the hibernate exception
 	 */
-	public void saveOrUpdate(Session session, P entity) throws Exception {
+	public void saveOrUpdate(Session session, P entity) throws HibernateException {
 		session.saveOrUpdate(entity);
 	}
 
 	/**
 	 * Select list object by simple query.
 	 *
-	 * @param session the session
 	 * @param queryString the query string
 	 * @return the list
-	 * @throws Exception the exception
+	 * @throws HibernateException the hibernate exception
 	 */
-	@SuppressWarnings("rawtypes")
-	public List selectByQuery(Session session, String queryString) throws Exception {
-		List list = null;
-		Query query = session.createQuery(queryString);
-		list = query.list();
-		return list;
+	public List<P> selectByQuery(String queryString) throws HibernateException {
+		return selectByQuery(queryString, -1, 0);
 	}
 
 	/**
 	 * Select by query.
 	 *
-	 * @param session the session
+	 * @param parameters the map contain parameters of query string
+	 * @param parameters the parameters
+	 * @return the list
+	 * @throws HibernateException the hibernate exception
+	 */
+	public List<P> selectByQuery(String queryString, Map<String, Object> parameters) throws HibernateException {
+		return selectByQuery(queryString, parameters, -1, 0);
+	}
+
+	/**
+	 * Select by query.
+	 *
 	 * @param queryString the query string
-	 * @param limit the maximum number of rows
+	 * @param limit the maximum number of rows. Zero or negatives value as meaning no limit...
 	 * @param offset the first result a row number, start from 0
 	 * @return the list
-	 * @throws Exception the exception
+	 * @throws HibernateException the hibernate exception
 	 */
-	@SuppressWarnings("rawtypes")
-	public List selectByQuery(Session session, String queryString, int limit, int offset) throws Exception {
-		List list = null;
-		Query query = session.createQuery(queryString);
-		query.setMaxResults(limit);
-		query.setFirstResult(offset);
-		list = query.list();
-		return list;
+	@SuppressWarnings("unchecked")
+	public List<P> selectByQuery(String queryString, int limit, int offset) throws HibernateException {
+		Session session = HibernateUtil.getSession();
+		try {
+			Query query = session.createQuery(queryString);
+			query.setMaxResults(limit);
+			query.setFirstResult(offset);
+			return query.list();
+		}
+		finally {
+			HibernateUtil.closeSession(session);
+		}
+	}
+
+	/**
+	 * Select by query.
+	 *
+	 * @param queryString the query string
+	 * @param parameters the map contain parameters of query string
+	 * @param limit the maximum number of rows. Zero or negatives value as meaning no limit...
+	 * @param offset the first result a row number, start from 0
+	 * @return the list
+	 * @throws HibernateException the hibernate exception
+	 */
+	@SuppressWarnings("unchecked")
+	public List<P> selectByQuery(String queryString, Map<String, Object> parameters, int limit, int offset) throws HibernateException {
+		Session session = HibernateUtil.getSession();
+		try {
+			Query query = session.createQuery(queryString);
+			for (Entry<String, Object> parameter : parameters.entrySet()) {
+				query.setParameter(parameter.getKey(), parameter.getValue());
+			}
+			query.setMaxResults(limit);
+			query.setFirstResult(offset);
+			return query.list();
+		}
+		finally {
+			HibernateUtil.closeSession(session);
+		}
 	}
 
 	/**
 	 * Select by sql query.
 	 *
-	 * @param session the session
-	 * @param queryString the query string
+	 * @param sqlQueryString the sql query string
 	 * @return the list
-	 * @throws Exception the exception
+	 * @throws HibernateException the hibernate exception
 	 */
 	@SuppressWarnings("rawtypes")
-	public List selectBySqlQuery(Session session, String queryString) throws Exception {
-		List list = null;
-		Query query = session.createSQLQuery(queryString);
-		list = query.list();
-		return list;
+	public List selectBySqlQuery(String sqlQueryString) throws HibernateException {
+		return selectBySqlQuery(sqlQueryString, -1, 0);
 	}
 
 	/**
 	 * Select by sql query.
 	 *
-	 * @param session the session
-	 * @param queryString the SQL query string
-	 * @param limit the maximum number of rows
-	 * @param offset the first result a row number, start from 0
+	 * @param sqlQueryString the sql query string
+	 * @param parameters the map contain parameters of query string
 	 * @return the list
-	 * @throws Exception the exception
+	 * @throws HibernateException the hibernate exception
 	 */
 	@SuppressWarnings("rawtypes")
-	public List selectBySqlQuery(Session session, String queryString, int limit, int offset) throws Exception {
-		List list = null;
-		Query query = session.createSQLQuery(queryString);
-		query.setMaxResults(limit);
-		query.setFirstResult(offset);
-		list = query.list();
-		return list;
+	public List selectBySqlQuery(String sqlQueryString, Map<String, Object> parameters) throws HibernateException {
+		return selectBySqlQuery(sqlQueryString, parameters, -1, 0);
+	}
+
+	/**
+	 * Select by sql query.
+	 *
+	 * @param sqlQueryString the sql query string
+	 * @param limit the maximum number of rows. Zero or negatives value as meaning no limit...
+	 * @param offset the first result a row number, start from 0
+	 * @return the list
+	 * @throws HibernateException the hibernate exception
+	 */
+	@SuppressWarnings("rawtypes")
+	public List selectBySqlQuery(String sqlQueryString, int limit, int offset) throws HibernateException {
+		Session session = HibernateUtil.getSession();
+		try {
+			Query query = session.createSQLQuery(sqlQueryString);
+			query.setMaxResults(limit);
+			query.setFirstResult(offset);
+			return query.list();
+		}
+		finally {
+			HibernateUtil.closeSession(session);
+		}
+	}
+
+	/**
+	 * Select by sql query.
+	 *
+	 * @param sqlQueryString the sql query string
+	 * @param parameters the map contain parameters of query string
+	 * @param limit the maximum number of rows. Zero or negatives value as meaning no limit...
+	 * @param offset the first result a row number, start from 0
+	 * @return the list
+	 * @throws HibernateException the hibernate exception
+	 */
+	@SuppressWarnings("rawtypes")
+	public List selectBySqlQuery(String sqlQueryString, Map<String, Object> parameters, int limit, int offset) throws HibernateException {
+		Session session = HibernateUtil.getSession();
+		try {
+			Query query = session.createSQLQuery(sqlQueryString);
+			for (Entry<String, Object> parameter : parameters.entrySet()) {
+				query.setParameter(parameter.getKey(), parameter.getValue());
+			}
+			query.setMaxResults(limit);
+			query.setFirstResult(offset);
+			return query.list();
+		}
+		finally {
+			HibernateUtil.closeSession(session);
+		}
 	}
 
 	/**
 	 * Select unique object by simple query.
 	 *
-	 * @param session the session
 	 * @param queryString the query string
 	 * @return the unique entity
-	 * @throws Exception the exception
+	 * @throws HibernateException the hibernate exception
 	 */
 	@SuppressWarnings("unchecked")
-	public P selectUniqueByQuery(Session session, String queryString) throws Exception {
-		P entity = null;
-		Query query = session.createQuery(queryString);
-		entity = (P) query.uniqueResult();
-		return entity;
+	public P selectUniqueByQuery(String queryString) throws HibernateException, NonUniqueResultException {
+		Session session = HibernateUtil.getSession();
+		try {
+			Query query = session.createQuery(queryString);
+			return (P) query.uniqueResult();
+		}
+		finally {
+			HibernateUtil.closeSession(session);
+		}
 	}
 
 	/**
@@ -306,9 +411,9 @@ public abstract class AbstractDAO<P, K extends Serializable> implements AutoClos
 	 *
 	 * @param session the session
 	 * @param entities the entities
-	 * @throws Exception the exception
+	 * @throws HibernateException the hibernate exception
 	 */
-	public void update(Session session, List<P> entities) throws Exception {
+	public void update(Session session, List<P> entities) throws HibernateException {
 		for (int i = 0; i < entities.size(); i++) {
 			P entity = entities.get(i);
 			session.update(entity);
@@ -324,9 +429,9 @@ public abstract class AbstractDAO<P, K extends Serializable> implements AutoClos
 	 *
 	 * @param session the session
 	 * @param entity the entity want to update
-	 * @throws Exception the exception
+	 * @throws HibernateException the hibernate exception
 	 */
-	public void update(Session session, P entity) throws Exception {
+	public void update(Session session, P entity) throws HibernateException {
 		session.update(entity);
 	}
 
@@ -336,9 +441,9 @@ public abstract class AbstractDAO<P, K extends Serializable> implements AutoClos
 	 * @param session the session
 	 * @param queryString the query string
 	 * @return the number entity updated or deleted
-	 * @throws Exception the exception
+	 * @throws HibernateException the hibernate exception
 	 */
-	public int updateBySQLQuery(Session session, String queryString) throws Exception {
+	public int updateBySQLQuery(Session session, String queryString) throws HibernateException {
 		Query query = session.createSQLQuery(queryString);
 		return query.executeUpdate();
 	}

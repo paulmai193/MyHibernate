@@ -1,14 +1,12 @@
 import logia.hibernate.util.HibernateUtil;
 
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 public class TestHibernate {
-
-	Session session;
 
 	@Before
 	public void setUp() throws Exception {
@@ -18,15 +16,53 @@ public class TestHibernate {
 
 	@After
 	public void tearDown() throws Exception {
-		HibernateUtil.closeSession(this.session);
 		HibernateUtil.releaseFactory();
 	}
 
 	@Test
-	public void test() {
-		this.session = HibernateUtil.getSession();
-		Assert.assertTrue("Session is opened", this.session.isOpen());
-		Assert.assertTrue("Session is connected", this.session.isConnected());
+	public void test() throws NumberFormatException, HibernateException, Exception {
+		Session session = HibernateUtil.beginTransaction();
+
+		System.out.println("Opened: " + HibernateUtil.getStatistics().getSessionOpenCount());
+		System.out.println("Close: " + HibernateUtil.getStatistics().getSessionCloseCount());
+		System.out.println("Opening: " + HibernateUtil.getStatistics().getConnectCount());
+
+		Session session1 = HibernateUtil.beginTransaction();
+
+		System.out.println("Opened: " + HibernateUtil.getStatistics().getSessionOpenCount());
+		System.out.println("Close: " + HibernateUtil.getStatistics().getSessionCloseCount());
+		System.out.println("Opening: " + HibernateUtil.getStatistics().getConnectCount());
+
+		Session session2 = HibernateUtil.beginTransaction();
+
+		System.out.println("Opened: " + HibernateUtil.getStatistics().getSessionOpenCount());
+		System.out.println("Close: " + HibernateUtil.getStatistics().getSessionCloseCount());
+		System.out.println("Opening: " + HibernateUtil.getStatistics().getConnectCount());
+
+		Session session3 = HibernateUtil.beginTransaction();
+
+		System.out.println("Opened: " + HibernateUtil.getStatistics().getSessionOpenCount());
+		System.out.println("Close: " + HibernateUtil.getStatistics().getSessionCloseCount());
+		System.out.println("Opening: " + HibernateUtil.getStatistics().getConnectCount());
+
+		Session session4 = HibernateUtil.beginTransaction();
+
+		System.out.println("Opened: " + HibernateUtil.getStatistics().getSessionOpenCount());
+		System.out.println("Close: " + HibernateUtil.getStatistics().getSessionCloseCount());
+		System.out.println("Opening: " + HibernateUtil.getStatistics().getConnectCount());
+
+		Session session5 = HibernateUtil.beginTransaction();
+
+		System.out.println("Opened: " + HibernateUtil.getStatistics().getSessionOpenCount());
+		System.out.println("Close: " + HibernateUtil.getStatistics().getSessionCloseCount());
+		System.out.println("Opening: " + HibernateUtil.getStatistics().getConnectCount());
+
+		Session session6 = HibernateUtil.beginTransaction();
+
+		System.out.println("Opened: " + HibernateUtil.getStatistics().getSessionOpenCount());
+		System.out.println("Close: " + HibernateUtil.getStatistics().getSessionCloseCount());
+		System.out.println("Opening: " + HibernateUtil.getStatistics().getConnectCount());
+
 	}
 
 }
