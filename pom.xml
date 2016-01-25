@@ -5,9 +5,10 @@
 	<artifactId>logia-hibernate-impl</artifactId>
 	<version>0.0.5</version>
 	<properties>
-		<hibernate.core.version>5.0.4.Final</hibernate.core.version>
-		<hibernate.search.version>5.5.0.Final</hibernate.search.version>
+		<hibernate.core.version>4.3.10.Final</hibernate.core.version>
+		<hibernate.search.version>5.3.0.Final</hibernate.search.version>
 		<hibernate.mysql.connector.version>5.1.37</hibernate.mysql.connector.version>
+		<javax.jta.version>1.1</javax.jta.version>
 		<logia.utility.version>0.1.2</logia.utility.version>
 	</properties>
 	<build>
@@ -60,6 +61,11 @@
 			<artifactId>mysql-connector-java</artifactId>
 			<version>${hibernate.mysql.connector.version}</version>
 		</dependency>
+		<!-- <dependency>
+			<groupId>javax.transaction</groupId>
+			<artifactId>jta</artifactId>
+			<version>${javax.jta.version}</version>
+		</dependency> -->
 		<dependency>
 			<groupId>logia</groupId>
 			<artifactId>logia-utility</artifactId>

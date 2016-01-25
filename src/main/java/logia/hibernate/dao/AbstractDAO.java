@@ -28,6 +28,9 @@ public abstract class AbstractDAO<P, K extends Serializable> {
 	/** The logger. */
 	protected final Logger LOGGER = Logger.getLogger(this.getClass());
 
+	protected AbstractDAO() {
+	}
+
 	/**
 	 * Borrow from pool.
 	 *
