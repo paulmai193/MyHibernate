@@ -58,6 +58,7 @@
 					<wtpversion>2.0</wtpversion>
 				</configuration>
 			</plugin>
+			
 			<!-- Deploy to remote repository -->
 			<plugin>
 				<artifactId>maven-deploy-plugin</artifactId>
@@ -74,7 +75,7 @@
 				<version>0.11</version>
 				<configuration>
 					<!-- git commit message -->
-					<message>LogiaHibernateImpl artifacts for ${project.version}</message>
+					<message>Logia Hibernate Impl artifacts for ${project.version}</message>
 					<!-- disable webpage processing -->
 					<noJekyll>true</noJekyll>
 					<!-- matches distribution management repository url above -->
