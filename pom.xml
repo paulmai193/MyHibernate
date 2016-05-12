@@ -16,14 +16,17 @@
 	<distributionManagement>
 		<repository>
 			<id>internal-repo</id>
-			<url>file://${project.build.directory}/logia-mvn-repo</url>
+			<!-- <url>file://${project.build.directory}/logia-mvn-repo</url> -->
+			<!-- <url>https://www.dropbox.com/sh/28irxajpng84nvd/AAC5_ESAJJZ8g8Ro8ydAo5FDa?dl=0</url> -->
+			<url>file://d:/Dropbox/Public/logia-mvn-repo</url>
 		</repository>
 	</distributionManagement>
 	
 	<repositories>
 		<repository>
 			<id>logia-mvn-repo</id>
-			<url>https://raw.github.com/paulmai193/logia-mvn-repo/</url>
+			<!-- <url>https://raw.github.com/paulmai193/logia-mvn-repo/</url> -->
+			<url>https://www.dropbox.com/sh/28irxajpng84nvd/AAC5_ESAJJZ8g8Ro8ydAo5FDa?dl=0</url>
 			<snapshots>
 				<enabled>true</enabled>
 				<updatePolicy>always</updatePolicy>
@@ -60,41 +63,43 @@
 			</plugin>
 			
 			<!-- Deploy to remote repository -->
-			<plugin>
+			<!-- <plugin>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<version>2.8.1</version>
 				<configuration>
 					<altDeploymentRepository>internal-repo::default::file://${project.build.directory}/logia-mvn-repo</altDeploymentRepository>
+					<altDeploymentRepository>internal-repo::default::https://www.dropbox.com/sh/28irxajpng84nvd/AAC5_ESAJJZ8g8Ro8ydAo5FDa?dl=0</altDeploymentRepository>
+					<altDeploymentRepository>internal-repo::default::file://d:/Dropbox/Public/logia-mvn-repo</altDeploymentRepository>
 				</configuration>
-			</plugin>
+			</plugin> -->
 
 			<!-- Github commit plugin -->
-			<plugin>
+			<!-- <plugin>
 				<groupId>com.github.github</groupId>
 				<artifactId>site-maven-plugin</artifactId>
 				<version>0.11</version>
 				<configuration>
-					<!-- git commit message -->
+					git commit message
 					<message>Logia Hibernate Impl artifacts for ${project.version}</message>
-					<!-- disable webpage processing -->
+					disable webpage processing
 					<noJekyll>true</noJekyll>
-					<!-- matches distribution management repository url above -->
+					matches distribution management repository url above
 					<outputDirectory>${project.build.directory}/logia-mvn-repo</outputDirectory>
-					<!-- remote branch name -->
+					remote branch name
 					<branch>refs/heads/master</branch>
-					<!-- If you remove this then the old artifact will be removed and new 
+					If you remove this then the old artifact will be removed and new 
 						one will replace. But with the merge tag you can just release by changing 
-						the version -->
+						the version
 					<merge>true</merge>
 					<includes>
 						<include>**/*</include>
 					</includes>
 
-					<!-- github repo name -->
+					github repo name
 					<repositoryName>logia-mvn-repo</repositoryName>
-					<!-- github username -->
+					github username
 					<repositoryOwner>paulmai193</repositoryOwner>
-					<!-- github password -->
+					github password
 					<password>dbf9b0b3bf68a8ff715b4a699980a897c3aab04e</password>
 				</configuration>
 				<executions>
@@ -105,7 +110,7 @@
 						<phase>deploy</phase>
 					</execution>
 				</executions>
-			</plugin>
+			</plugin> -->
 
 			<!-- Source plugin -->
 			<plugin>
