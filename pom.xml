@@ -14,22 +14,20 @@
 	
 	<distributionManagement>
 		<repository>
-			<id>internal-repo</id>
-			<!-- <url>file://${project.build.directory}/logia-mvn-repo</url> -->
-			<!-- <url>https://www.dropbox.com/sh/28irxajpng84nvd/AAC5_ESAJJZ8g8Ro8ydAo5FDa?dl=0</url> -->
-			<url>file://d:/Dropbox/Public/logia-mvn-repo</url>
+			<id>nexus</id>
+			<name>Internal repositories</name>
+			<url>http://192.168.1.6:8081/nexus/content/repositories/releases/</url>
 		</repository>
 	</distributionManagement>
 	
 	<repositories>
 		<repository>
-			<id>logia-mvn-repo</id>
-			<!-- <url>https://raw.github.com/paulmai193/logia-mvn-repo/</url> -->
-			<url>https://www.dropbox.com/sh/28irxajpng84nvd/AAC5_ESAJJZ8g8Ro8ydAo5FDa?dl=0</url>
-			<snapshots>
+			<id>nexus</id>
+			<url>http://192.168.1.6:8081/nexus/content/repositories/releases</url>
+			<releases>
 				<enabled>true</enabled>
 				<updatePolicy>always</updatePolicy>
-			</snapshots>
+			</releases>
 		</repository>
 	</repositories>
 	
