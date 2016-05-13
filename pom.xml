@@ -9,8 +9,7 @@
 		<hibernate.search.version>5.3.0.Final</hibernate.search.version>
 		<hibernate.mysql.connector.version>5.1.37</hibernate.mysql.connector.version>
 		<javax.jta.version>1.1</javax.jta.version>
-		<logia.utility.version>0.1.2</logia.utility.version>
-		<github.global.server>github</github.global.server>
+		<logia.utility.version>0.1.3</logia.utility.version>
 	</properties>
 	
 	<distributionManagement>
@@ -61,56 +60,6 @@
 					<wtpversion>2.0</wtpversion>
 				</configuration>
 			</plugin>
-			
-			<!-- Deploy to remote repository -->
-			<!-- <plugin>
-				<artifactId>maven-deploy-plugin</artifactId>
-				<version>2.8.1</version>
-				<configuration>
-					<altDeploymentRepository>internal-repo::default::file://${project.build.directory}/logia-mvn-repo</altDeploymentRepository>
-					<altDeploymentRepository>internal-repo::default::https://www.dropbox.com/sh/28irxajpng84nvd/AAC5_ESAJJZ8g8Ro8ydAo5FDa?dl=0</altDeploymentRepository>
-					<altDeploymentRepository>internal-repo::default::file://d:/Dropbox/Public/logia-mvn-repo</altDeploymentRepository>
-				</configuration>
-			</plugin> -->
-
-			<!-- Github commit plugin -->
-			<!-- <plugin>
-				<groupId>com.github.github</groupId>
-				<artifactId>site-maven-plugin</artifactId>
-				<version>0.11</version>
-				<configuration>
-					git commit message
-					<message>Logia Hibernate Impl artifacts for ${project.version}</message>
-					disable webpage processing
-					<noJekyll>true</noJekyll>
-					matches distribution management repository url above
-					<outputDirectory>${project.build.directory}/logia-mvn-repo</outputDirectory>
-					remote branch name
-					<branch>refs/heads/master</branch>
-					If you remove this then the old artifact will be removed and new 
-						one will replace. But with the merge tag you can just release by changing 
-						the version
-					<merge>true</merge>
-					<includes>
-						<include>**/*</include>
-					</includes>
-
-					github repo name
-					<repositoryName>logia-mvn-repo</repositoryName>
-					github username
-					<repositoryOwner>paulmai193</repositoryOwner>
-					github password
-					<password>dbf9b0b3bf68a8ff715b4a699980a897c3aab04e</password>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>site</goal>
-						</goals>
-						<phase>deploy</phase>
-					</execution>
-				</executions>
-			</plugin> -->
 
 			<!-- Source plugin -->
 			<plugin>
